@@ -1,0 +1,4 @@
+define KFEATURE_DESCRIPTION "Hyper-V enablement"
+
+kconf hardware hyperv.cfg
+

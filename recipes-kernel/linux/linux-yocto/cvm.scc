@@ -1,0 +1,4 @@
+define KFEATURE_DESCRIPTION "Confidential-VM enablement"
+
+kconf hardware cvm.cfg
+

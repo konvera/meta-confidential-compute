@@ -1,0 +1,8 @@
+# short-description: Create an EFI disk image
+# long-description: Creates a partitioned EFI disk image that the user
+# can directly dd to boot media.
+
+part /boot --source bootimg-efi --sourceparams="loader=systemd-boot,create-unified-kernel-image=true,initrd=${INITRAMFS_IMAGE}-${MACHINE}.${INITRAMFS_FSTYPES}" --ondisk sda --label msdos --active --align 1024
+part /data --ondisk sda --fstype=ext4 --label platform --align 1024 --size 2 --use-uuid
+
+bootloader --ptable gpt --timeout=0 --append="console=ttyS0,115200 console=tty0 ramdisk_size=402653184"
