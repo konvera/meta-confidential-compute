@@ -7,9 +7,10 @@ that can subsequently be picked up by external image generation tools such as wi
 
 CVM_DEPS = "busybox-mdev e2fsprogs-resize2fs parted init-ifupdown initscripts base-files base-passwd netbase busybox-udhcpd"
 
-PACKAGE_INSTALL = "e2fsprogs-mke2fs delve gdb strace go-ethereum ca-certificates sysvinit busybox-udhcpd dropbear ${CVM_DEPS} ${VIRTUAL-RUNTIME_base-utils} ${ROOTFS_BOOTSTRAP_INSTALL}"
+# delve gdb strace
+PACKAGE_INSTALL = "e2fsprogs-mke2fs go-ethereum ca-certificates sysvinit busybox-udhcpd dropbear ${CVM_DEPS} ${VIRTUAL-RUNTIME_base-utils} ${ROOTFS_BOOTSTRAP_INSTALL}"
 
-INITRAMFS_MAXSIZE = "150000"
+INITRAMFS_MAXSIZE = "200000"
 
 # Do not pollute the initrd image with rootfs features
 IMAGE_FEATURES = "debug-tweaks"
@@ -29,6 +30,6 @@ IMAGE_ROOTFS_SIZE = "8192"
 IMAGE_ROOTFS_EXTRA_SPACE = "0"
 
 # Use the same restriction as initramfs-live-install
-COMPATIBLE_HOST = "(i.86|x86_64|aarch64|arm).*-linux"
+COMPATIBLE_HOST = "x86_64.*-linux"
 
 # QB_KERNEL_CMDLINE_APPEND += "debugshell=3 init=/bin/busybox sh init"
