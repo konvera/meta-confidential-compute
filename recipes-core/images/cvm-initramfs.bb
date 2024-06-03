@@ -7,10 +7,9 @@ that can subsequently be picked up by external image generation tools such as wi
 
 CVM_DEPS = "busybox-mdev e2fsprogs-resize2fs parted init-ifupdown initscripts base-files base-passwd netbase busybox-udhcpd"
 
-# delve gdb strace
-PACKAGE_INSTALL = "e2fsprogs-mke2fs go-ethereum ca-certificates sysvinit busybox-udhcpd dropbear ${CVM_DEPS} ${VIRTUAL-RUNTIME_base-utils} ${ROOTFS_BOOTSTRAP_INSTALL}"
+PACKAGE_INSTALL = "e2fsprogs-mke2fs ca-certificates sysvinit busybox-udhcpd dropbear ${CVM_DEPS} ${VIRTUAL-RUNTIME_base-utils} ${ROOTFS_BOOTSTRAP_INSTALL}"
 
-INITRAMFS_MAXSIZE = "200000"
+INITRAMFS_MAXSIZE = "1000000"
 
 # Do not pollute the initrd image with rootfs features
 IMAGE_FEATURES = "debug-tweaks"

@@ -17,5 +17,5 @@ CONVERSION_CMD:vhd:prepend = "truncate -s %1MiB ${IMAGE_NAME}.wic; \
 IMAGE_FEATURES[validitems] += "hyperv"
 IMAGE_FEATURES = "hyperv"
 
-IMAGE_FSTYPES = "wic wic.vhd"
+IMAGE_FSTYPES = "wic wic.vhd wic.qcow2"
 WKS_FILE = "mkefiinitrd.wks"
