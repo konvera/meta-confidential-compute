@@ -1,0 +1,79 @@
+#!/bin/sh
+#
+### BEGIN INIT INFO
+# Provides:		disk-encryption
+# Required-Start:	$remote_fs $syslog $networking
+# Required-Stop:	$remote_fs $syslog
+# Default-Start:	2 3 4 5
+# Default-Stop:		1
+# Short-Description:	Start and stop the disk-encryption daemon
+### END INIT INFO
+#
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+NAME=disk-encryption
+DESC="Disk Encryption"
+KEYSIZE=64
+LOGFILE=/tmp/disk-encryption.log
+
+start() {
+	echo -n "Starting $DESC: "
+	parted -sf /dev/sda resizepart 2 '100%'
+	KEY=''
+	get_key KEY
+	if ! echo -n "$KEY" | cryptsetup luksOpen /dev/sda2 data -; then
+		echo "LUKS volume not opened successfully. Formatting and creating filesystem."
+		echo -n "$KEY" | cryptsetup -q --batch-mode luksFormat /dev/sda2
+		echo -n "$KEY" | cryptsetup luksOpen /dev/sda2 data -
+		mkfs.ext4 /dev/mapper/data
+	fi
+	mkdir -p /persistent
+	mount /dev/mapper/data /persistent
+	echo "$NAME."
+}
+
+# from https://github.com/kelderek/TPM2-LUKS/blob/main/tpm2-luks-unlock.sh
+get_key() {
+	# Attempt to read from the TPM2 to see if something is already there
+	KEY=$(tpm2_nvread 0x1500016 2> /dev/null)
+	if [ "$KEY" == "" ] # No key was found in TPM2 or user wants a new key made
+	then
+		# Generate a $KEYSIZE long char alphanumeric key and save it to /root/tpm2.key
+		KEY=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | dd bs=1 count=$KEYSIZE 2> /dev/null)
+
+		# Store the key in /root/tpm2.key
+		echo -n $KEY > /root/tpm2.key
+
+		# Clear out the area on the TPM2 just to be safe
+		tpm2_nvundefine 0x1500016
+
+		# Define the area for the key on the TPM2
+		tpm2_nvdefine -s $KEYSIZE 0x1500016
+
+		# Store the key in the TPM
+		tpm2_nvwrite -i /root/tpm2.key 0x1500016
+
+		# Make sure /root/tpm2.key and the TPM2 device match
+		tpm2_nvread -s $KEYSIZE 0x1500016 2> /dev/null | diff /root/tpm2.key - > /dev/null
+		if [ $? != 0 ]
+			then
+			echo "Could not verify the key is stored properly in the TPM2 device."
+			echo "Cannot proceed!"
+			exit
+		fi
+		rm /root/tpm2.key
+	fi
+	eval "$1=$KEY"
+}
+
+case "$1" in
+  start)
+        start > $LOGFILE 2>&1
+        ;;
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N start" >&2
+	exit 1
+	;;
+esac
+exit 0
